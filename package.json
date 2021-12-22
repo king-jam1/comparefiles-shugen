@@ -1,0 +1,22 @@
+{
+  "name": "comparefiles-shugen",
+  "version": "1.0.2",
+  "description": "comparefiles and create a html",
+  "main": "./bin/comparefiles",
+  "scripts": {
+    "test": "./bin/comparefiles"
+  },
+  "keywords": [
+    "comparefiles",
+    "files",
+    "compare"
+  ],
+  "author": "LiaoJinYuan",
+  "license": "ISC",
+  "bin": {
+    "comparefiles": "./bin/comparefiles"
+  },
+  "dependencies": {
+    "minimist": "^1.2.5"
+  }
+}
