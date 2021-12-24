@@ -143,7 +143,7 @@ if (filePathList.length !== 0) {
           "js"
         )} </script>`);
       htmlContent += appendCode;
-      const oFilename = output || "./index.html";
+      const oFilename = output || "./comparefiles.html";
       fs.writeFile(`${oFilename}`, htmlContent, { flag: "w+" }, (err) => {
         if (err) {
           console.log("HTML file write error!");
