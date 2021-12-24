@@ -50,13 +50,13 @@ comparefiles a.json b.json c.json
 comparefiles a.json b.json c.json -o G:\test.html
 ```
 
-generating template offline 
+## generating template offline 
 
 ```shell
 comparefiles --html index.html --css index.css --js index.js
 ```
 
-generate HTML files using the generated offline template
+## generate HTML files using the generated offline template
 
 ```shell
 comparfiles --template index.html --linkcss G:\index.css --linkjs a.json b.json c.json -o test1.html 
