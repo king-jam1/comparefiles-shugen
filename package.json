@@ -1,6 +1,6 @@
 {
   "name": "comparefiles-shugen",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "comparefiles and create a html",
   "main": "./bin/comparefiles",
   "scripts": {
@@ -11,6 +11,7 @@
     "files",
     "compare"
   ],
+  "repository": "https://github.com/king-jam1/comparefiles-shugen",
   "author": "LiaoJinYuan",
   "license": "ISC",
   "bin": {

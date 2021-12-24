@@ -1,92 +1,162 @@
 #!/usr/bin/env node
-/**
- * command line usage
- * 最多6个文件同时比较
- * compareFiles path1 path2 -o ./origin.html
- * -o 指定输出路径，文件名 没有的话默认是 当前文件夹下 文件名：index.html
- *
- * **/
+
+console.time("\033[42;30m DONE \033[40;32m Compiled successfully:\033[0m");
 const parseOpts = require("minimist");
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
 const args = parseOpts(process.argv.slice(2));
-const templatehtmlPath = path.dirname(process.argv[1]) + "\\template.html";
-console.log(templatehtmlPath);
-
 const filePathList = args._;
 const output = args.o;
+const templateDirPath =
+  path.dirname(fs.realpathSync(process.argv[1])) + "/template";
+const oJsPath =
+  args.js || args.JS || args.Js ? args.js || args.JS || args.Js : "";
+const oCssPath =
+  args.css || args.CSS || args.Css ? args.css || args.CSS || args.Css : "";
+const oHtmlpath =
+  args.html || args.HTML || args.Html
+    ? args.html || args.HTML || args.Html
+    : "";
 
-const files = filePathList.map((filePath) => {
-  const dirname = path.dirname(filePath);
-  const basename = path.basename(filePath);
-  const extname = path.extname(filePath).replace(".", "");
-
-  let content = "";
+function getTemplate(path, extName) {
   try {
-    content = fs.readFileSync(filePath, "utf-8");
-  } catch (err) {
-    console.log(err);
+    return fs.readFileSync(`${path}.${extName}`, "utf-8");
+  } catch (error) {
+    throw new Error("Failed to parse the template file!");
   }
-
-  return {
-    filename: basename,
-    filepath: filePath,
-    content,
-    extname: extname,
-  };
-});
-
-// 读取html模板
-let htmlContent = "";
-const options = {};
-let appendCode = `
-  <script>
-    // 获取 容器
-    var viewsBoxEl = window.document.getElementById('views-container');
-    let highlight = false,
-        connect = "align",
-        collapse = false;
-    CodeMirror.MergeView(
-        viewsBoxEl,
-        Object.assign(
-            {},
-            {
-                value: \`${files[0].content}\`,
-                origLeft: \`${files[1] ? files[1]?.content : ""}\`,
-                origRight: \`${files[2] ? files[2]?.content : ""}\`,
-                origMostRight:  \`${files[3] ? files[3]?.content : ""}\`,
-                origRight04: \`${files[4] ? files[4]?.content : ""}\`,
-                origRight05:  \`${files[5] ? files[5]?.content : ""}\`,
-                readOnly: true,
-                lineNumbers: true,
-                firstLineNumber: 1,
-                mode: "text/json",
-                highlightDifferences: highlight,
-                connect: connect,
-                revertButtons: false,
-                collapseIdentical: collapse,
-                showCursorWhenSelecting: false,
-            }
-        )
-    );
-</script>
-  `;
-fs.readFile(templatehtmlPath, "utf-8", (err, data) => {
-  if (err) {
-    throw new Error("HTML模板不存在");
-  }
-  htmlContent += data;
-  htmlContent += appendCode;
-  const filename = output || "./index.html";
-  // 生成一个html文件到指定目录
-  fs.writeFile(`./${filename}`, htmlContent, { flag: "w+" }, (err) => {
+}
+if (oHtmlpath) {
+  const tHtmlContent = getTemplate(templateDirPath, "html");
+  fs.writeFile(oHtmlpath, tHtmlContent, "utf-8", (err) => {
     if (err) {
-      console.log("HTML文件生成错误");
+      console.log(`Faild to write ${oHtmlpath}`);
       return;
     }
     console.log(
-      "\033[42;30m DONE \033[40;32m Compiled successfully in 19987ms\033[0m"
+      "\033[42;30m Succeed \033[40;32m HTML file write successfully:\033[0m",
+      fs.realpathSync(oHtmlpath)
     );
-    console.log("\033[45;31m HTML文件已生成\033[0m");
   });
-});
+}
+if (oCssPath) {
+  const tCssContent = getTemplate(templateDirPath, "css");
+  fs.writeFile(oCssPath, tCssContent, "utf-8", (err) => {
+    if (err) {
+      console.log(`Faild to write ${oCssPath}`);
+      return;
+    }
+    console.log(
+      "\033[42;30m Succeed \033[40;32m CSS file write successfully:\033[0m",
+      fs.realpathSync(oCssPath)
+    );
+  });
+}
+if (oJsPath) {
+  const tJsContent = getTemplate(templateDirPath, "js");
+  fs.writeFile(oJsPath, tJsContent, "utf-8", (err) => {
+    if (err) {
+      console.log(`Faild to write ${oJsPath}`);
+      return;
+    }
+    console.log(
+      "\033[42;30m Succeed \033[40;32m JS file write successfully:\033[0m",
+      fs.realpathSync(oJsPath)
+    );
+  });
+}
+
+if (filePathList.length !== 0) {
+  console.log(filePathList)
+  const iTemplatePath = args?.template;
+  const iLinkcssPath = args?.linkcss;
+  const iLinkjsPath = args?.linkjs;
+  const files = filePathList.map((filePath) => {
+    const basename = path.basename(filePath);
+    const extname = path.extname(filePath).replace(".", "");
+    let content = "";
+    try {
+      content = fs.readFileSync(filePath, "utf-8");
+    } catch (err) {
+      console.log(err);
+    }
+    return {
+      filename: basename,
+      filepath: filePath,
+      content,
+      extname: extname,
+    };
+  });
+  let htmlContent = "";
+  const options = {};
+  let appendCode = `
+    <script>
+      var viewsBoxEl = window.document.getElementById('views-container');
+      let highlight = false,
+          connect = "align",
+          collapse = false;
+      CodeMirror.MergeView(
+          viewsBoxEl,
+          Object.assign(
+              {},
+              {
+                  value: \`${files[0].content}\`,
+                  origLeft: \`${files[1] ? files[1].content : ""}\`,
+                  origRight: \`${files[2] ? files[2].content : ""}\`,
+                  origMostRight:  \`${files[3] ? files[3].content : ""}\`,
+                  origRight04: \`${files[4] ? files[4].content : ""}\`,
+                  origRight05:  \`${files[5] ? files[5].content : ""}\`,
+                  readOnly: true,
+                  lineNumbers: true,
+                  firstLineNumber: 1,
+                  mode: "text/json",
+                  highlightDifferences: highlight,
+                  connect: connect,
+                  revertButtons: false,
+                  collapseIdentical: collapse,
+                  showCursorWhenSelecting: false,
+              }
+          )
+      );
+  </script>
+    `;
+  console.log(iTemplatePath);
+  fs.readFile(
+    iTemplatePath || templateDirPath + ".html",
+    "utf-8",
+    (err, data) => {
+      if (err) {
+        throw new Error("HTML template do not exit!");
+      }
+      htmlContent += data;
+      iLinkcssPath &&
+        (htmlContent += `<link rel="stylesheet" href="${iLinkcssPath}">`);
+      iLinkcssPath ||
+        (htmlContent += `<style>${getTemplate(
+          templateDirPath,
+          "css"
+        )}</style>`);
+      iLinkjsPath && (htmlContent += `<script src="${iLinkjsPath}"></script>`);
+      iLinkjsPath ||
+        (htmlContent += `<script> ${getTemplate(
+          templateDirPath,
+          "js"
+        )} </script>`);
+      htmlContent += appendCode;
+      const oFilename = output || "./index.html";
+      fs.writeFile(`${oFilename}`, htmlContent, { flag: "w+" }, (err) => {
+        if (err) {
+          console.log("HTML file write error!");
+          return;
+        }
+        console.timeEnd(
+          "\033[42;30m DONE \033[40;32m Compiled successfully:\033[0m"
+        );
+        console.log();
+        console.log("----------------");
+        console.log("\033[40;32m HTML file writing succeed. \033[0m");
+        console.log("----------------");
+      });
+    }
+  );
+}
